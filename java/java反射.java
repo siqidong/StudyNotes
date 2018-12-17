@@ -10,10 +10,10 @@ JAVA反射（放射）机制：“程序运行时，允许改变程序结构或�
 Java程序可以加载一个运行时才得知名称的class，获悉其完整构造（但不包括methods定义），
 并生成其对象实体、或对其fields设值、或唤起其methods。
 
- 反射机制是框架技术的原理和核心部分。
- 通过反射机制我们可以动态的通过改变配置文件(以后是XML文件)的方式来加载类、调用类方法，
- 以及使用类属性。这样的话，对于编码和维护带来相当大的便利。在程序进行改动的时候，也只
- 会改动相应的功能就行了，调用的方法是不用改的。更不会一改就改全身。
+反射机制是框架技术的原理和核心部分。
+通过反射机制我们可以动态的通过改变配置文件(以后是XML文件)的方式来加载类、调用类方法，
+以及使用类属性。这样的话，对于编码和维护带来相当大的便利。在程序进行改动的时候，也只
+会改动相应的功能就行了，调用的方法是不用改的。更不会一改就改全身。
 
 
 代码例子：
@@ -37,21 +37,21 @@ public class MyTest {
 public MyTest(){
   	//要求用户输入类的全路径
     String classInfo=JOptionPane.showInputDialog(null,"输入类全路径");
-    try{
-        Class cla=Class.forName(classInfo);//根据类的全路径进行类加载，返回该类的Class对象
-     	Method[] method=cla.getDeclaredMethods();//利用得到的Class对象的自审，返回方法对象集合
-        for(Method me : method){//遍历该类方法的集合
-            System.out.println(me.toString());//打印方法信息
+        try{
+            Class cla=Class.forName(classInfo);//根据类的全路径进行类加载，返回该类的Class对象
+     	      Method[] method=cla.getDeclaredMethods();//利用得到的Class对象的自审，返回方法对象集合
+            for(Method me : method){//遍历该类方法的集合
+                System.out.println(me.toString());//打印方法信息
+            }
+            System.out.println("********");
+            Field[] field=cla.getDeclaredFields();//利用得到的Class对象的自审，返回属性对象集合
+  	   	    for(Field me : field){//遍历该类属性的集合
+                System.out.println(me.toString());//打印属性信息
+            }
+        } catch(ClassNotFoundException e) {
+          e.printStackTrace();
         }
-        System.out.println("********");
-        Field[] field=cla.getDeclaredFields();//利用得到的Class对象的自审，返回属性对象集合
-  	   	for(Field me : field){//遍历该类属性的集合
-            System.out.println(me.toString());//打印属性信息
-        }
-    } catch(ClassNotFoundException e) {
-        e.printStackTrace();
     }
-}
 
     public static void main(String[] args) {
         new MyTest();
@@ -75,13 +75,13 @@ package com;
 
 public class MyTest {
 	public static void main(String[]args) {
-        TestOne one=null;
+      TestOne one=null;
 	    try{
-		    Class cla=Class.forName("com.TestOne");
-		    //进行com.TestOne类加载，返回一个Class对象
+		      Class cla=Class.forName("com.TestOne");
+		      //进行com.TestOne类加载，返回一个Class对象
        		System.out.println("********");
        		one=(TestOne)cla.newInstance();
-		    //产生这个Class类对象的一个实例，调用该类无参的构造方法，作用等同于new TestOne()
+		      //产生这个Class类对象的一个实例，调用该类无参的构造方法，作用等同于new TestOne()
        	}catch(Exceptione){
            	e.printStackTrace();
        	}
@@ -93,11 +93,11 @@ public class MyTest {
 }
 
 class TestOne{
-	static{
+	  static{
        	System.out.println("静态代码块运行");
     }
     	
-	TestOne(){
+	  TestOne(){
        	System.out.println("构造方法");
     }
 }
@@ -138,16 +138,16 @@ public class ConstructorTest {
 		      //获得指定字符串类对象
 		    Class cla = Class.forName("reflect.Tests");
 		      //设置Class对象数组，用于指定构造方法类型
-            Class[] cl = new Class[]{int.class,int.class};
+        Class[] cl = new Class[]{int.class,int.class};
 		      //获得Constructor构造器对象。并指定构造方法类型
-       	    Constructor con = cla.getConstructor(cl);
+       	Constructor con = cla.getConstructor(cl);
 		      //给传入参数赋初值
-       	    Object[] x = {newInteger(33),newInteger(67)};
+       	Object[] x = {newInteger(33),newInteger(67)};
 		      //得到实例
-            Object obj = con.newInstance(x);
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
+        Object obj = con.newInstance(x);
+      }catch(Exception e) {
+        e.printStackTrace();
+      }
     }
 }
 
