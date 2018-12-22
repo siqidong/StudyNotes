@@ -145,6 +145,9 @@ public class ConstructorTest {
        	Object[] x = {newInteger(33),newInteger(67)};
 		      //得到实例
         Object obj = con.newInstance(x);
+
+        //which is equal to:
+        //Object obj = Class.forName("reflect.Tests").getConstructor(new Class[]{int.class,int.class}).newInstance(new Object[]{newInteger(33),newInteger(67)});
       }catch(Exception e) {
         e.printStackTrace();
       }
@@ -184,7 +187,7 @@ public class MethodTest {
             //获得窗体类的setSize方法对象，并指定该方法参数类型为boolean
            Method methodVisible = cla.getMethod("setVisible", newClass[]{boolean.class});
             /*执行setVisible()方法，并传入一个Object[]数组对象，作为该方法参数。等同于窗体对象.setVisible(true);*/
-           method Visible.invoke(obj, new Object[]{new Boolean(true)});
+           methodVisible.invoke(obj, new Object[]{new Boolean(true)});
        }catch(Exception e) {
            e.printStackTrace();
        }

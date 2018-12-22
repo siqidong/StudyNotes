@@ -1,0 +1,40 @@
+Chapter 2
+
+* Container (e.g.: Tomcat)
+Server hands HTTP request to container in which the servlet is deployed.
+Container gives servlet the HTTP request and response.
+Container calls the doPost() and doGet() in a servlet.
+
+* If no container, how to write a web application using Java?
+1. Create a socket connection with the server, and create a listener for
+The socket.
+2. Create a thread manager, implement security, memory management…
+
+Reasons to have container:
+- Communication support
+  The container provides an easy way for your servlets to talk to your web server.	
+- Lifecycle management
+  The Container controls the life and death of your servlets.
+- Multithreading support
+  The Container automatically creates a new Java thread for every servlet request it receives.
+- Declarative security
+  You get to use an XML deployment descriptor to configure (and modify) security without 
+  having to hard-code it into your servlet (or any other) class code. 
+- JSP support
+  The container takes care of translatin JSP code into real Java.
+
+* How container handles a request
+1. User clicks a link that has a URL to a servlet instead of a static page.
+2. The container “sees” that the request is for a servlet, so the container creates two objects:
+   1) HttpServletResponse 2) HttpServletRequest
+3. The container finds the correct servlet based on the URL in the request, 
+   creates or allocates a thread for that request, and passes the request and response objects to
+   the servlet thread.
+4. The container calls the servlet’s service() method. 
+   Depending on the type of request, the service() method calls either the doGet() or doPost() method.
+5. The doGet() method generates the dynamic page and stuffs the page into the response object.
+   Remember, the container still has a reference to the response object!
+6. The thread completes, the container converts the response object into an HTTP response,
+   sends it back to the client, then deletes the request and response objects.
+
+* How container map URL to servlet?
