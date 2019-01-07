@@ -308,25 +308,79 @@ Difference between Cookie and Session?
   To reduce the burden on server, use cookie.
 
 
- 
+============================================================
+
+HTTPS:
+HTTP:   HTTP -> TCP -> IP
+HTTPS:  HTTPS -> SSL/TLS -> TCP -> IP
+
+SSL: Security socket layer
+* 为网络通信提供安全以及数据完整性的一种安全协议
+* 是操作系统对外的api，SSL 3.0以后更名为TLS
+* 采用身份验证和数据加密保证网络通信的安全和数据的完整性
+
+加密的方式：
+* 对称加密：加密和解密都是用同一个密钥（高效）
+* 非对称加密：加密使用的密钥和解密使用的密钥是不相同的（公钥+私钥）
+区块链：非对称加密
+* 哈希算法：将任意长度的信息转换为固定长度的值，不可逆（md5）
+* 数字签名：证明某个消息或者文件是某人发出／认同的
+
+HTTPS数据传输流程：
+* 浏览器将支持的加密算法发送给服务器
+* 服务器选择一套浏览器支持的加密算法，以证书的形式会发给浏览器
+* 浏览器验证证书的合法性，并结合证书公钥加密信息发送给服务器
+* 服务器使用私钥解密信息，验证哈希，加密响应消息发给浏览器
+* 浏览器解密响应消息，并对消息进行验证，之后进行加密交互数据
+
+------------------------------------------------------------
+
+Questions:
+Difference between HTTP and HTTPS?
+* HTTPS需要去 申请证书，HTTP不需要
+* HTTPS密文传输，HTTP明文传输
+* 连接方式不同，HTTPS默认使用443，HTTP使用80端口
+* HTTPS = HTTP+加密+认证+完整性保护，较HTTP安全
+
+HTTP真的安全吗？not really。。。
+* 浏览器默认填充http://，请求需要进行跳转，又被劫持的可能性
+* 可以使用优化HSTS (HTTP Strict Transport Security)，正在推行中
+
+Difference between IPv4 and IPv6?
+https://www.geeksforgeeks.org/differences-between-ipv4-and-ipv6/
 
 
+============================================================
+
+Socket简介
+
+Socket是对TCP/IP协议的抽象，是操作系统对外开放的借口
+Socket通信流程：
+
+                       Server
+                          |
+          创建socket  socket()
+                          |        Client
+    绑定socket和端口号  bind()         |
+                          |        socket()   创建socket
+          监听该端口号  listen()       |
+                          |        connect()  连接指定计算机的端口
+接受来自客户端的连接请求  accept()       |
+                          |        send()     向socket中写入信息
+    从socket中读取字符  recv()         |
+                          |        close()    关闭socket
+           关闭socket  close()     
 
 
+------------------------------------------------------------
 
+Questions:
+使用TCP/UDP写一个socket programming app
 
+TCP: https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
+udp: https://www.geeksforgeeks.org/udp-server-client-implementation-c/
 
-
-
-
-
-
-
-
-
-
-
-
+============================================================
 
 
 
