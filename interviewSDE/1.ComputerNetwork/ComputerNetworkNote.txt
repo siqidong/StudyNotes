@@ -1,0 +1,332 @@
+============================================================
+
+TCP的三次握手：
+在TCP/IP协议中，TCP提供可靠的连接服务，采用三次握手建立一个链接:
+1. 第一次握手：建立连接时，client端发送SYN包(syn=j)到server端，
+并进入SYN_SEND状态，等待server端确认;
+
+2. 第二次握手：server端收到SYN包，必须确认client的SYN(ask=j+1)，
+同时自己也要发送一个SYN包(syn=k)，即SYN+ACK包，此时server进入SYN_REVEIVED状态;
+
+3. 第三次握手：client端收到server的SYN+ACK包，向server发送确认包
+ACK (ask=k+1)，此包发送完成后，client和server端进入ESTABLISHED状态，
+完成三次握手.
+
+------------------------------------------------------------
+
+Questions:
+How to calculate seq/ack number?
+* https://blog.csdn.net/HappyRocking/article/details/78198776
+
+Why we need three handshakes to setup the connection?
+* To initialize the Sequence Number.
+* Client and server need to notify the other about their own 
+sequence number, to guarantee the data being transferred get the 
+correct order, and TCP need this sequence number to organize the data.
+
+Danger zone about the first handshake - SYN timeout
+Why?
+* Server got client's SYN, after sending SYN+ACK, but didn't get ACK back.
+* Server will keep resending the SYN+ACK, until get timeout.
+In Linux, this timeout value is 5 times (= 1+2+4+8+16+32 = 63 seconds)
+
+What?
+* SYN flood: when hackers keep sending SYN without sending ACK.
+* For each SYN, server needs 63 seconds to stop the connection.
+* Hackers therefore can consume all SYN in server to prevent normal SYN request.
+
+How to protect?
+* After SYN queue is full, sever send SYN cookie thru tcp_syncookie sequence number.
+* Hackers won't respond to this sequence number;
+but normal clients will send back a SYN Cookie to set up the connection directly.
+
+After setup the connection, client no response?
+Keep alive mechanism.
+* Keep sending packets to client, within each keep alive interval.
+* Stop the connection after reaching the number of keep alive message 
+without receiving a response from client.
+
+
+============================================================
+
+TCP的四次挥手:
+采用四次挥手来释放链接
+1. 第一次挥手：client发送一个FIN，用来关闭client到server的数据传送，client进入FIN_WAIT_1状态
+2. 第二次挥手：server收到FIN后，发送一个ACK给client，seq为ack+1
+client进入FIN_WAIT_2状态, server进入CLOSE_WAIT状态
+3. 第三次挥手：server发送一个FIN，用来关闭server到client的数据传送，server进入LAST_ACK状态
+4. 第四次挥手：client收到FIN后，client进入TIME_WAIT状态，接着发送一个ACK给server，seq为ack+1,
+server进入CLOSED状态，完成四次挥手.
+
+------------------------------------------------------------
+
+Questions:
+Why there is a time wait status?
+* Guarantee there is enough time for the other to get ACK packet
+* Avoid confusing old and new connections
+
+Why we need four handshakes to close the connection?
+* Because TCP is full-duplex, so both client and server need FIN and ACK packets.
+
+Why there are many CLOSE_WAIT on server?
+After client sending FIN packet, server is busing on reading/writing, 
+forget to check FIN packet.
+* Bugs in code, didn't release resources in time
+* Bugs in configuration, wrong config for thread pool.
+Linus: 
+$ netstat -n | awk '/^tcp/{++S[$NF]}END{for(a in S) print a,S[a]}'
+
+Learn $ netstat commands: (must!)
+https://www.cnblogs.com/ggjucheng/archive/2012/01/08/2316661.html
+
+
+============================================================
+
+UDP的特点：
+* 面向非链接
+* 不维护链接状态，支持向多个客户端传输相同消息
+* 数据包overhead只有8个byte，额外开销少
+* 吞吐量只受限于数据生成速率，传输速度，机器性能
+* 尽最大努力交付，不保证可靠交付，不需要维持复杂的链接状态表
+* 面向报文，不对应用程序提供的报文进行拆分或合并
+
+Differences between TCP / UDP:
+
+TCP: connection oriented, three handshakes;
+     Reliable, will resend packets if not received;
+     Guarantee the order of packets;
+     Slow;
+     Heavy weight, 20 bytes overhead;
+UDP: connectionless;
+     Not reliable, drop packet;
+     Orderless;
+     Fast, for online video etc.;
+     Light weight, 8 bytes overhead;
+
+
+============================================================
+
+TCP的滑动窗口：
+RTT: Round Trip Time 发送一个数据包到收到对应的ACK所需时间
+RTO: Retransmittion Timeout 重传时间间隔
+* 计算RTO的算法是基于RTT的，不是直接写死的，用来建立重传机制
+
+TCP是使用滑动窗口进行流量控制和乱序重排的
+* 保证TCP的可靠性，顺序性
+* 保证TCP的流控特性
+
+窗口数据的计算过程：
+Client (sender):
+-------[#######################]-------TCP
+       |               |      |  
+       a               b      c
+#: Data in the window
+a: LastByteAcked
+b: LastByteSent
+c: LastByteWritten
+ 
+a->b->c is ordered and sequenced.
+
+Server (receiver):
+-------[################----###]-------TCP
+       |               |      |  
+       a               b      c
+#: Data being received
+-: Data not received yet
+a: LastByteRead
+b: NextByteExpected
+c: LastByteReceived
+
+* AdvertisedWindow = MaxRcvBuffer - (LastByteReceived - LastByteRead)
+* EffectiveWindow = AdvertisedWindow - (LastByteSent - LastByteAcked)
+
+
+TCP的发送方：
+-------[#####][###########][------][------]-------TCP
+category: 1       2            3       4
+* category 1: Sent and acknowledged
+* category 2: Send but not yet acknowledged
+* category 3: Not sent but receipient ready to receive
+* category 4: Not sent and receipient not ready to receive
+
+滑动窗口的演示:
+-------[#######################]-------TCP
+              ^
+              |
+             acked
+
+--------------[#######################]-------TCP
+
+TCP的接收方：
+-------[#####][###########][------][------]-------TCP
+category: 1       2            3       4
+* category 1+2: Sent and acknowledged
+* category 3: Not received, sender can send -> [sliding window]
+* category 4: Not received, sender can't send
+
+一些要点：
+* TCP的可靠性来源于TCP的确认重传机制
+* 发送方只有接受到接收方对于本段发送窗口字节的ACK后，才会移动发送方的左窗口
+* 接收方只有在前面所有段都确认的情况下，才会移动接收方的左窗口
+* 接收方还有前面字节没有收到，但收到后面字节的情况下，不会滑动左窗口，并不对后续字节确认，以保证重传
+
+
+============================================================
+
+HTTP:
+是一个应用层的协议，基于request-response无状态的协议;
+HTTP 1.1: persistent connection
+
+Difference between HTTP 1.0 and HTTP 1.1:
+https://stackoverflow.com/questions/246859/http-1-0-vs-1-1
+ 
+HTTP特点：
+1. 支持client-server模式
+2. 简单快速：GET POST
+3. 灵活：允许传输任意类型的对象
+4. 无链接：每次只处理一个请求 
+   （长链接）：下层实现对上层透明
+5. 无状态：协议对于事务处理没有记忆
+
+HTTP 1.1: Keep Alive
+HTTP 2.0: niu bier, but hard to promote
+
+HTTP定义了web客户端<->web服务器的通讯：
+client -> server: 请求报文：请求方法，url， 协议版本， 请求头部，请求数据
+server -> client: 相应报文：协议版本，状态码，服务器信息，响应头部，响应数据
+
+请求／响应步骤：
+1. 客户端连接到web服务器
+2. 发送HTTP请求
+3.服务器接收请求并返回HTTP响应
+4. 释放TCP链接 (Keep alive: 还可以继续等待请求)
+5.客户端浏览器解析HTML内容
+
+------------------------------------------------------------
+
+Questions:
+In browser, what happens if you enter "www.google.com"?
+* DNS: url -> IP address
+* TCP connection: three handshakes
+* Client send HTTP request
+* Server process HTTP request and send a HTTP response
+* Browser analyse HTTP response and render the HTML
+* Browser close up TCP connection
+ans: https://medium.com/@maneesha.wijesinghe1/what-happens-when-you-type-an-url-in-the-browser-and-press-enter-bb0aa2449c1a
+
+HTTP status code?
+* 1xx: Informational: Request is received, keep processing
+* 2xx: Success: Request is successfully received, understood, accepted
+* 3xx: Redirect: Need further action before finish processing request
+* 4xx: Client error: Error on reqeust or request cannot be processed
+* 5xx: Server error: Server could not process request
+ans:https://www.restapitutorial.com/httpstatuscodes.html
+
+Common HTTP status code?
+* 200 OK
+* 400 Bad Request
+* 401 Unauthorized
+* 403 Forbidden
+* 404 Not Found
+* 500 Internal Server Error
+* 503 Server Unavailable
+
+Difference between GET and POST request?
+* HTTP request level:
+GET: in the url
+POST: in the request body (the same in the security level)
+* Database level:
+GET: meets the requirement for Idempotence  and Security
+POST: Does not meet both
+* Other level:
+GET: Can be cached, stored and bookmarked
+POST: Cannot
+Since GET is Idempotence, so can be cached by CDN, and lessen the burden for server.
+Idempotence: 
+https://www.infoq.com/news/2013/04/idempotent
+https://blog.csdn.net/rickiyeat/article/details/71081968
+https://tech.meituan.com/distributed_system_mutually_exclusive_idempotence_cerberus_gtis.html
+
+
+============================================================
+
+Cookie和Session
+Cookie：
+* 由服务器发送给客户端的特殊信息，以文本形式储存在客户端
+* 客户端再次请求后，会把cookie回传
+* 服务器收到后，会解析cookie生成与客户端相对应的内容
+
+Cookie的设置和发送过程：
+  Web Client                       Web Server
+      |                                 |
+      | 1.HTTP Request                  |
+      | ------------------------------> |
+      |                                 |
+      | 2.HTTP Response + Set Cookie    |
+      | <------------------------------ |
+      |                                 |
+      | 3.HTTP Request + Cookie         |
+      | ------------------------------> |
+      |                                 |
+      | 4.HTTP Response                 |
+      | <------------------------------ |
+      |                                 |
+
+Session:
+* 服务器端的机制，在服务器上保存的信息 
+* 解析客户端的请求并操作session id，按需保存状态信息
+
+Session的实现方式：
+* 通过cookie来实现
+  Web Client                       Web Server
+      |                                 |
+      | 1.HTTP Request                  |
+      | ------------------------------> |
+      |                                 |
+      | 2.HTTP Response + Set Cookie (JSESSIONID=XX)
+      | <------------------------------ |
+      |                                 |
+      | 3.HTTP Request + Cookie (JSESSIONID=XX)
+      | ------------------------------> |
+      |                                 |
+      | 4.HTTP Response                 |
+      | <------------------------------ |
+      |                                 |
+* 使用url回写来实现
+服务端在发送response时都带上JSESSIONID，客户端点击任何链接都会把JSESSIONID带回服务器
+In Tomcat, use both: first try cookie, then try url
+
+------------------------------------------------------------
+
+Questions:
+Difference between Cookie and Session?
+* Cookie data is stored on client's browser;
+  Session data is stored on server.
+* Session is safer than cookie;
+  Hacker can analyse local machine's cookie and abuse cookie.
+* Session is stored on server, will put burden on server's performance;
+  To reduce the burden on server, use cookie.
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
