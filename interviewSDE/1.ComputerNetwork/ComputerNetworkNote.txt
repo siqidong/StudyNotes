@@ -382,5 +382,26 @@ udp: https://www.geeksforgeeks.org/udp-server-client-implementation-c/
 
 ============================================================
 
+URI, URL, URN
+
+URI: Uniform Resource Identifier 统一资源标志符
+用来唯一标识互联网上的信息资源，包含URL和URN
+
+URL: Uniform Resource Locator 统一资源定位器
+http://  user:pass@host.com: 80 / path ? query=string # hash
+[------] [-------] [-------] [-]  [---]
+ schema   authorize  locate  port  路由
+ (ftp..)    user     server
+
+URN: Uniform Resource Name 永久统一资源定位符
+在资源移动之后还能被找到
+目前还没有非常成熟的使用方案 
+
+
+
+
+
+
+
 
 
