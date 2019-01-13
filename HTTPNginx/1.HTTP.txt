@@ -1,0 +1,87 @@
+============================================================
+$ curl baidu.com
+$ curl www.baidu.com
+$ curl -v www.baidu.com
+
+CORS跨域请求的限制与解决
+link: https://yq.aliyun.com/articles/69313
+
+浏览器发现跨域请求后会自动拦截掉跨域请求返回的内容，并在浏览器中报错
+解决：
+1. 服务器设置 'Access-Control-Allow-Origin': '*'
+2. html <link><init><script>标签中写路径加载内容时，浏览器允许跨域
+
+注意：
+'Access-Control-Allow-Origin': '*' 是不安全的
+任意第三方服务都可以访问 -> 
+'Access-Control-Allow-Origin': 'www.baidu.com' 只有当前服务可以访问
+
+============================================================
+
+CORS预请求
+CORS允许方法: 
+    [GET, HEAD, POST]
+CORS允许Content-Type: 
+    [text/plain, multiple/form-data, application/x-www-form-urlencoded]
+其他限制：
+    请求头限制
+    XMLHttpRequestUpload对象均没有注册任何事件监听器
+    请求中没有使用ReadableStream对象
+
+突破跨域限制的几种方法:
+    'Access-Control-Allow-Headers': 'X-Test-Cors'
+    'Access-Control-Allow-Methods': 'POST, PUT, DELETE'
+    'Access-Control-Max-Age': '1000'
+    (在此时间内不用再进行预请求的验证，直接发请求就可以了)
+
+
+============================================================
+
+缓存头Cache-Control的含义和使用
+    public: http经过的的任何地方都可以缓存
+    private: 只有发起请求的浏览器可以缓存
+    no-cache: 可以缓存，但使用时必须经过服务器端的验证后才能使用缓存
+
+到期
+    max-age = <seconds>
+    s-maxage = <seconds> （专为代理服务器设置）
+    max-stale = <seconds> （即使缓存过期，还可以继续使用，只在发起端有作用）
+
+重新验证（非强制）
+    must-revalidate 已经过期后必须从原服务端进行验证，不能直接从cache里拿数据
+    proxy-revalidate 应用在缓存服务器中
+    no-store  本地和代理服务器都不可以在本地进行缓存
+    no-transform 不允许代理服务器改动数据
+
+url没有改变的时候，直接从memory cache读数据
+前端刷新浏览器缓存的方案：
+打包完成js时加上资源文件的内容的hash码，嵌入js，可以及时更新缓存
+    hash没变化：用cache里面的静态资源数据
+    hash有变化：发起新的静态资源请求
+
+============================================================
+
+缓存验证Last-Modified和Etag
+验证头
+1. Last-Modified 资源上次修改时间
+配合If-Modified-Since或者If-Unmodified-Since(少用)使用
+给服务器发送请求，服务器通过浏览器发过来的request header
+对比上次修改时间以验证资源是否需要更新
+
+2. Etag 数据签名
+任何修改，签名都会改变，如hash值
+配合If-Match或者If-None-Match使用
+给服务器发送请求，服务器通过浏览器发过来的request header
+对比资源的签名以判断资源是否需要更新
+
+
+
+
+------------------------------------------------------------
+
+
+
+
+
+
+
