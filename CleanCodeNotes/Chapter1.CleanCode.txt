@@ -1,0 +1,90 @@
+Chapter1: Clean Code
+
+=====================================
+There will be code
+=====================================
+Code is really the language in which we ultimately express the require- ments.
+But we will never eliminate necessary precision—so there will always be code.
+
+=====================================
+Bad code
+=====================================
+They had rushed the product to market and had made a huge mess in the code. As they added more and more features, the code got worse and worse until they simply could not manage it any longer. It was the bad code that brought the company down.
+
+Wading - impeded by bad code
+
+Writing bad code and backlog it to clean it later?
+"Later equals Never"
+
+=====================================
+The total cost of owning a mess
+=====================================
+As the mess builds, the productivity of the team continues to decrease, asymptotically approaching zero.
+
+Productivity
+ | :
+ |  :
+ |   :
+ |     :
+ |        :
+ |            :  
+ |                     :   .   .
+ --------------------------------> Time
+
+
+==> Redesign
+Cannot continue on odious code -> Redesign -> Race between two teams -> Nightmare cycle
+
+==> Attitude
+It is our fault to write bad code.
+It’s your job to defend the code with equal passion.
+So it is unprofessional for programmers to bend to the will of managers who don’t understand the risks of making messes.
+
+==> The Primal Conundrum
+The only way to make the deadline—the only way to go fast—is to keep the code as clean as possible at all times.
+
+==> Art of Clean Code
+Writing clean code is a lot like painting a picture.
+Being able to recognize clean code from dirty code does not mean that we know how to write clean code.
+"Code-sense" of cleanliess of code, help programmers choose the best variations.
+
+==> What is Clean Code
+Bjarne Stroustrup: "Elegant", pleasing to read, efficiency
+
+Grady Booch: readability, simple and direct
+
+“Big” Dave Thomas: Easy for other people to enhance it, test, minimal dependency, literate 
+
+Michael Feathers: Care for code
+
+Ron Jeffries: 
+• Runs all the tests;
+• Contains no duplication;
+• Expresses all the design ideas that are in the system;
+• Minimizes the number of entities such as classes, methods, functions, and the like.
+
+Ward Cunningham: Makes the language look like it was made for the problem
+
+=====================================
+Schools of thoughts
+=====================================
+
+
+=====================================
+We are authors
+=====================================
+
+
+=====================================
+The boy scout rule
+=====================================
+
+
+=====================================
+Prequal and principles
+=====================================
+
+
+=====================================
+Conclusion
+=====================================
